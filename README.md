@@ -230,6 +230,128 @@ One request for 10 items beats 10 requests for 1 item.
 
 ---
 
+## 🔄 Fallback LLMs — Free & Cheap Alternatives
+
+Not every task needs Claude. Here's when to use alternatives:
+
+### The Golden Rule
+
+| Task | Best Model | Why |
+|------|------------|-----|
+| **Writing code** | Claude (Sonnet/Opus) | Best code quality, fewest bugs, understands context |
+| **Everything else** | Use fallbacks | Save money without sacrificing output |
+
+**Claude is the best code writer. Don't cheap out on code. But for everything else? Fallbacks work fine.**
+
+---
+
+### Free Tier Options
+
+| Provider | Model | Free Tier | Best For |
+|----------|-------|-----------|----------|
+| **Google Gemini** | gemini-1.5-flash | 1,500 req/day | Summarization, Q&A, research |
+| **Google Gemini** | gemini-1.5-pro | 50 req/day | Complex reasoning, analysis |
+| **Grok** | grok-beta | Free on X Premium | Real-time info, casual queries |
+| **Groq** | llama-3.1-70b | 30 req/min | Fast inference, simple tasks |
+| **Groq** | mixtral-8x7b | 30 req/min | Multilingual, general purpose |
+| **Mistral** | mistral-small | Limited free | European hosting, GDPR |
+| **Ollama (local)** | llama3.2:3b | Unlimited | Heartbeats, file ops, routing |
+| **Ollama (local)** | qwen2.5:7b | Unlimited | Better reasoning, still free |
+
+---
+
+### Task-to-Model Routing
+
+| Task Type | Primary | Fallback | Cost Savings |
+|-----------|---------|----------|--------------|
+| **Code generation** | Claude Sonnet | — | Don't fallback |
+| **Code review** | Claude Sonnet | — | Don't fallback |
+| **Debugging** | Claude Sonnet | — | Don't fallback |
+| **Summarization** | Gemini Flash | Groq Llama | 100% (free) |
+| **Research/Q&A** | Gemini Flash | Grok | 100% (free) |
+| **Translation** | Gemini Flash | Mistral | 100% (free) |
+| **Data extraction** | Gemini Flash | Groq Mixtral | 100% (free) |
+| **Email drafting** | Gemini Pro | Claude Haiku | 90% |
+| **Document analysis** | Gemini Pro | Claude Haiku | 90% |
+| **Heartbeats** | Ollama local | — | 100% (free) |
+| **File operations** | Ollama local | — | 100% (free) |
+| **Routing decisions** | Ollama local | Groq | 100% (free) |
+
+---
+
+### Configuration Example
+
+```yaml
+# Multi-model routing in OpenClaw
+agents:
+  defaults:
+    model:
+      primary: anthropic/claude-haiku-4-5
+    
+    # Route by task type
+    routing:
+      code: anthropic/claude-sonnet-4-5      # Never compromise on code
+      summarize: google/gemini-1.5-flash     # Free tier
+      research: google/gemini-1.5-flash      # Free tier
+      translate: google/gemini-1.5-flash     # Free tier
+      heartbeat: ollama/llama3.2:3b          # Local, free
+      default: anthropic/claude-haiku-4-5    # Cheap fallback
+
+# Provider configs
+models:
+  google:
+    enabled: true
+    apiKey: ${GOOGLE_API_KEY}
+  groq:
+    enabled: true
+    apiKey: ${GROQ_API_KEY}
+  ollama:
+    enabled: true
+    baseUrl: http://localhost:11434
+```
+
+---
+
+### Getting API Keys (All Free)
+
+| Provider | Sign Up | Free Tier |
+|----------|---------|-----------|
+| **Google AI Studio** | [aistudio.google.com](https://aistudio.google.com) | 1,500 req/day |
+| **Groq** | [console.groq.com](https://console.groq.com) | 30 req/min |
+| **Mistral** | [console.mistral.ai](https://console.mistral.ai) | Limited free |
+| **Grok** | X Premium subscription | Unlimited with sub |
+
+---
+
+### When NOT to Fallback
+
+**Always use Claude for:**
+- ✅ Writing new code
+- ✅ Refactoring existing code
+- ✅ Debugging complex issues
+- ✅ Code review and security analysis
+- ✅ System architecture decisions
+- ✅ Anything that touches production
+
+**Why?** Claude produces fewer bugs, better structure, and actually understands your codebase context. The cost difference is negligible compared to debugging bad code.
+
+---
+
+### Real Cost Comparison
+
+Running 1,000 queries/day:
+
+| Strategy | Monthly Cost |
+|----------|--------------|
+| All Claude Opus | $450+ |
+| All Claude Sonnet | $90+ |
+| All Claude Haiku | $15 |
+| **Smart routing (code=Claude, rest=free)** | **$5-10** |
+
+**80% of queries don't need Claude. Route them to free tiers.**
+
+---
+
 ## 🤝 Contributing
 
 Found a new optimization? Submit a PR!
