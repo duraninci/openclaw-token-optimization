@@ -352,6 +352,166 @@ Running 1,000 queries/day:
 
 ---
 
+## 🔁 API Key Failover — Automatic Rate Limit Recovery
+
+Got multiple API accounts? Set up automatic failover so rate limits don't stop your work.
+
+### The Problem
+
+```
+Error 429: Rate limit exceeded
+```
+
+Your workflow stops. You manually switch keys. Waste of time.
+
+### The Solution
+
+Automatic failover between accounts — company key hits limit, personal key takes over. Zero intervention.
+
+---
+
+### Option 1: LiteLLM Proxy (Recommended) ⭐
+
+LiteLLM is a proxy that sits between your app and AI providers. Handles failover, load balancing, and retries automatically.
+
+**Install:**
+```bash
+pip install litellm
+```
+
+**Create config file** (`litellm_config.yaml`):
+```yaml
+model_list:
+  # Primary: Company account
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_key: sk-ant-company-xxxxx
+    
+  # Fallback: Personal account
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_key: sk-ant-personal-xxxxx
+
+  # Can add more providers too
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_key: sk-ant-backup-xxxxx
+
+router_settings:
+  retry_after: 60              # Wait 60s before retry
+  allowed_fails: 1             # Fail once, then switch
+  fallbacks: [{"claude-sonnet": ["claude-sonnet"]}]
+  routing_strategy: "least-busy"  # Or "simple-shuffle"
+```
+
+**Start the proxy:**
+```bash
+litellm --config litellm_config.yaml --port 4000
+```
+
+**Point OpenClaw to the proxy:**
+```yaml
+# In your OpenClaw config
+models:
+  anthropic:
+    baseUrl: http://localhost:4000
+```
+
+**What happens:**
+1. Request goes to LiteLLM proxy
+2. Proxy tries company key
+3. If 429 → automatically tries personal key
+4. If that fails → tries backup key
+5. Your app never sees the error
+
+**Run as background service:**
+```bash
+# Using pm2
+pm2 start "litellm --config litellm_config.yaml --port 4000" --name litellm-proxy
+
+# Or using systemd (create /etc/systemd/system/litellm.service)
+```
+
+---
+
+### Option 2: OpenClaw Native Config
+
+If your OpenClaw version supports multiple keys:
+
+```yaml
+models:
+  anthropic:
+    apiKeys:
+      - ${ANTHROPIC_API_KEY_COMPANY}
+      - ${ANTHROPIC_API_KEY_PERSONAL}
+      - ${ANTHROPIC_API_KEY_BACKUP}
+    fallbackOnRateLimit: true
+    retryDelay: 60
+```
+
+Check your version: `openclaw --version` and docs at [docs.openclaw.ai](https://docs.openclaw.ai)
+
+---
+
+### Option 3: Environment Variable Rotation
+
+Simple script for manual or cron-triggered rotation:
+
+```bash
+#!/bin/bash
+# rotate-api-key.sh
+
+COMPANY_KEY="sk-ant-company-xxxxx"
+PERSONAL_KEY="sk-ant-personal-xxxxx"
+
+# Check which key is active
+if [ "$ANTHROPIC_API_KEY" == "$COMPANY_KEY" ]; then
+  export ANTHROPIC_API_KEY=$PERSONAL_KEY
+  echo "Switched to personal key"
+else
+  export ANTHROPIC_API_KEY=$COMPANY_KEY
+  echo "Switched to company key"
+fi
+
+# Restart to pick up new key
+openclaw gateway restart
+```
+
+**Trigger on rate limit detection:**
+```bash
+# In your monitoring script
+if grep -q "429" /var/log/openclaw/error.log; then
+  ./rotate-api-key.sh
+fi
+```
+
+---
+
+### Comparison
+
+| Approach | Auto-Failover | Setup Time | Maintenance |
+|----------|---------------|------------|-------------|
+| **LiteLLM Proxy** ⭐ | ✅ Instant | 10 min | Low |
+| OpenClaw Native | ✅ Instant | 5 min | None |
+| Env Rotation Script | ❌ Manual/Cron | 5 min | Medium |
+
+---
+
+### Pro Tips
+
+1. **Stagger rate limit windows** — If both accounts share the same billing cycle, they'll hit limits together. Use accounts with different reset times if possible.
+
+2. **Monitor which key is active** — LiteLLM logs which key handled each request. Useful for cost allocation.
+
+3. **Set up alerts** — If you're falling back frequently, you need more capacity or better routing.
+
+4. **Combine with model routing** — Use cheap/free models for non-critical tasks (see Fallback LLMs section above), save your rate limit budget for code.
+
+---
+
 ## 🤝 Contributing
 
 Found a new optimization? Submit a PR!
