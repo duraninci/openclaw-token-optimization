@@ -247,19 +247,34 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## 🙏 Acknowledgments
-
-- Built for the [OpenClaw](https://github.com/openclaw/openclaw) AI agent framework
-- Inspired by real production cost challenges
-- Created by [Duran Inci](https://github.com/duraninci)
-
----
-
 ## 🔗 Related Projects
 
 - [OpenClaw](https://github.com/openclaw/openclaw) — The AI agent framework
 - [RookOS](https://github.com/duraninci/rookos) — AI Agent Command Center
+- [OpenClaw Legal Skills](https://github.com/duraninci/openclaw-legal-skills) — AI-powered legal analysis
 
 ---
 
-**Stop burning money on AI. Start optimizing today. ⚡**
+## 🛠️ Who Built This
+
+Built by **[Duran Inci](https://duraninci.com)** and the teams at **[Optimum7](https://optimum7.com)** and **[Zen Media](https://zenmedia.com)**.
+
+We run AI agents 24/7 for ecommerce operations, lead enrichment, and content automation. Our bill got stupid. So we fixed it. This guide is how.
+
+**More of our work:**
+- 📺 [YouTube](https://youtube.com/@duraninci) — AI implementation, ecommerce, business
+- 🔗 [LinkedIn](https://linkedin.com/in/duraninci)
+- 🐦 [Twitter/X](https://twitter.com/duraninci)
+
+---
+
+## 🤝 Work With Us
+
+Running AI at scale and burning cash? We've been there.
+
+| What | Who |
+|------|-----|
+| AI systems & ecommerce automation | [Optimum7](https://optimum7.com) |
+| B2B marketing & AI visibility | [Zen Media](https://zenmedia.com) |
+
+Happy to trade notes with anyone optimizing their stack.
