@@ -1,0 +1,51 @@
+# OpenClaw Token Optimization Config
+# Copy to ~/.openclaw/config.yaml
+
+# Model Configuration - Default to cheapest capable model
+agents:
+  defaults:
+    model:
+      primary: anthropic/claude-haiku-4-5
+    
+    # Model aliases for easy switching
+    models:
+      anthropic/claude-opus-4-5:
+        alias: opus
+      anthropic/claude-sonnet-4-5:
+        alias: sonnet
+      anthropic/claude-haiku-4-5:
+        alias: haiku
+      ollama/llama3.2:3b:
+        alias: local
+      ollama/qwen2.5:7b:
+        alias: qwen
+
+# Heartbeat Configuration - Use FREE local model
+heartbeat:
+  every: 1h
+  model: ollama/llama3.2:3b
+  prompt: "Check HEARTBEAT.md. If nothing needs attention, reply HEARTBEAT_OK."
+
+# Enable Prompt Caching for repeated content
+cache:
+  enabled: true
+  ttl: 5m
+
+# Ollama Configuration (local models)
+models:
+  ollama:
+    enabled: true
+    baseUrl: http://localhost:11434
+
+# Rate Limiting to prevent runaway costs
+rate_limits:
+  requests_per_minute: 20
+  tokens_per_minute: 100000
+  daily_budget: 10.00
+  monthly_budget: 300.00
+
+# Session Management
+sessions:
+  max_history: 20
+  auto_clear_after_hours: 24
+  compress_old_messages: true
